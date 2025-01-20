@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+import { Schema, model } from 'mongoose';
+import { hash } from 'bcrypt';
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   name: {
     type: String,
     required: [true, 'A name is required'],
@@ -37,15 +37,15 @@ const userSchema = new mongoose.Schema({
 // Hashing of password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  this.password = await hash(this.password, 10);
   next();
 });
 
-// delrtion of the password from the JSON
+// deletion of the password from the JSON
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
   return user;
 };
 
-module.exports = mongoose.model('User', userSchema);
+export default model('User', userSchema);
