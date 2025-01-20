@@ -1,20 +1,15 @@
-import bcryptjs from "bcryptjs";
+
 import { User } from "../models/user.model.js";
 
-export const signup = async (req, res,next) => {
-  const { userName, email, password } = req.body; //destructuring the client infos
-  // ensuring the fulfilment of all infos
-  if (!userName || !email || !password) {
-    res.status(400).json({ message: "credencials should be fill" });
-  }
-
-  const hashPassword = bcryptjs.hashSync(password, 10); // hashing the password
-
+// Créer un nouvel utilisateur
+exports.createUser = async (req, res) => {
   try {
-    const newUser = new User({ userName, email, password: hashPassword }); // changing into the new hash password
-    await newUser.save();
-    res.status(201).json({ message: "user created successfully" });
+    const { name, email, password } = req.body;
+    const user = new User({ name, email, password });
+    await user.save();
+    res.status(201).json({ message: 'User created successfully', user });
   } catch (error) {
-    next(error)
+    res.status(400).json({ message: 'error during the creation of the user', error });
   }
 };
+

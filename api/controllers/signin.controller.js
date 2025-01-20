@@ -1,23 +1,16 @@
-import bcryptjs from "bcryptjs";
-import { errorHandler } from "../outils/errors.js";
-import { User } from "../models/user.model.js";
-import jwt from "jsonwebtoken"
+import { findOne } from '../models/user.model';
 
-export const signin = async (req,res,next) => {
-    const {email,password} = req.body;
-    try {
-       const validUser = await User.findOne({email});
-        if (!validUser) {
-            return next(errorHandler(404,'user not fund '))
-        };
-        const validPassword = bcryptjs.compareSync(password,validUser.password )
-        if (!validPassword) {
-           return next(errorHandler(400,'wrong credencial '))
-        }
-        const {password:hashPassword , ...rest}= validUser._doc
-        const token = jwt.sign({id:validUser._id},process.env.JWT_SECRET);
-        res.cookie('access_token',token,{httpOnly:true}).status(200).json({message:'success',rest})
-    } catch (error) {
-        next(errorHandler(400,error.message));
+
+// Authentifier un utilisateur
+export async function loginUser(req, res) {
+  try {
+    const { email, password } = req.body;
+    const user = await findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
+    res.status(200).json({ message: 'Connexion réussie', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error });
+  }
 }
