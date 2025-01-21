@@ -12,6 +12,5 @@ router.get('/', eventController.getEvents);
 router.post('/', authMiddleware, eventController.createEvent);
 router.put('/:id', authMiddleware, eventController.updateEvent);
 router.delete('/:id', authMiddleware, eventController.deleteEvent);
-router.post('/:id/register', authMiddleware, eventController.registerForEvent);
-
+router.post('/:id/register-with-payment', authMiddleware, eventController.registerForEventWithPayment);
 export default eventRoute;

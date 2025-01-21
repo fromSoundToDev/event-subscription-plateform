@@ -1,5 +1,8 @@
 import Event from '../models/event.model';
 import { find, findByIdAndUpdate, findByIdAndDelete, findById } from 'mongoose'
+import QRCode from 'qrcode';
+import nodemailer from 'nodemailer';
+import Notification from '../models/notification.model';
 
 // Create an event
 export async function createEvent(req, res) {
@@ -58,25 +61,76 @@ export async function deleteEvent(req, res) {
   }
 }
 
-// Inscrire un utilisateur à un événement
-export async function registerForEvent(req, res) {
+
+
+// Simuler le paiement et générer un QR Code
+exports.registerForEventWithPayment = async (req, res) => {
   try {
     const { id } = req.params; // ID de l'événement
-    const event = await findById(id);
+    const { paymentDetails } = req.body; // Simuler des détails de paiement
+    const event = await Event.findById(id);
 
     if (!event) {
-      return res.status(404).json({ message: 'cant find event' });
+      return res.status(404).json({ message: 'event not found' });
     }
 
     if (event.attendeesCount >= event.maxAttendees) {
-      return res.status(400).json({ message: 'no more seat avalaible for this event' });
+      return res.status(400).json({ message: 'any place avalaible' });
     }
 
+    // Simuler un paiement réussi
+    const paymentSuccessful = paymentDetails && paymentDetails.amount > 0; // Exemple
+    if (!paymentSuccessful) {
+      return res.status(400).json({ message: 'payment failed' });
+    }
+
+    // Générer un QR Code avec les informations de l'inscription
+    const qrData = {
+      eventId: event._id,
+      userId: req.user.id,
+      paymentDetails,
+    };
+    const qrCode = await QRCode.toDataURL(JSON.stringify(qrData));
+
+    // Mettre à jour les places disponibles
     event.attendeesCount += 1;
     await event.save();
 
-    res.status(200).json({ message: 'subsciption succeded', event });
+    // Envoyer un e-mail de confirmation avec le QR Code
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // Vous pouvez remplacer par un autre service SMTP
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: req.user.email,
+      subject: 'subscription confirmation',
+      html: `
+        <h1>Inscription Confirmée</h1>
+        <p>Thanks for subscribing to the event : <strong>${event.title}</strong>.</p>
+        <p>Here is your QR Code :</p>
+        <img src="${qrCode}" alt="QR Code">
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    // Ajouter une notification à l'utilisateur qui a créé l'événement
+    const notification = new Notification({
+      userId: event.createdBy,
+      message: `You get one subscrition for  : ${event.title}`,
+    });
+    await notification.save();
+
+    res.status(200).json({
+      message: 'subscription succeded ',
+      qrCode,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error during subscription' });
+    res.status(500).json({ message: 'payment error during subscription', error });
   }
-}
+};
