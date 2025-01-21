@@ -1,16 +1,16 @@
 
 import express from 'express';
-import eventController from '../controllers/event.controller';
-import authMiddleware from '../middlewares/auth.middleware';
+import {createEvent,getEvents,updateEvent,deleteEvent,registerForEventWithPayment} from '../controllers/event.controller.js';
+import {protect} from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 // Routes publiques
-router.get('/', eventController.getEvents);
+router.get('/', getEvents);
 
 // Routes protégées
-router.post('/', authMiddleware, eventController.createEvent);
-router.put('/:id', authMiddleware, eventController.updateEvent);
-router.delete('/:id', authMiddleware, eventController.deleteEvent);
-router.post('/:id/register-with-payment', authMiddleware, eventController.registerForEventWithPayment);
+router.post('/', protect, createEvent);
+router.put('/:id', protect, updateEvent);
+router.delete('/:id', protect, deleteEvent);
+router.post('/:id/register-with-payment', protect, registerForEventWithPayment);
 export default eventRoute;

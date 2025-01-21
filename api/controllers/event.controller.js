@@ -64,7 +64,7 @@ export async function deleteEvent(req, res) {
 
 
 // Simuler le paiement et générer un QR Code
-exports.registerForEventWithPayment = async (req, res) => {
+export const registerForEventWithPayment = async (req, res) => {
   try {
     const { id } = req.params; // ID de l'événement
     const { paymentDetails } = req.body; // Simuler des détails de paiement

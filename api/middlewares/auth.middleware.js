@@ -3,7 +3,7 @@ import { findById } from '../models/User';
 import asyncHandler from 'express-async-handler';
 
 // Vérifie que l'utilisateur est authentifié
-const protect = asyncHandler(async (req, res, next) => {
+export const protect = asyncHandler(async (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -31,4 +31,4 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-export default { protect };
+
