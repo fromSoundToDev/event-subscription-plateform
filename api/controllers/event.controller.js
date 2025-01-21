@@ -3,17 +3,25 @@ import { find, findByIdAndUpdate, findByIdAndDelete, findById } from 'mongoose'
 import QRCode from 'qrcode';
 import nodemailer from 'nodemailer';
 import Notification from '../models/notification.model';
+import expressAsyncHandler from 'express-async-handler';
 
 // Create an event
 export async function createEvent(req, res) {
   try {
     const { title, description, date, location, maxAttendees } = req.body;
+
+  if (!title || !description || !date || !location || !seatsAvailable || !price) {
+    res.status(400);
+    throw new Error('Tous les champs sont requis.');
+  }
+  const imagePath = req.file ? req.file.path : 'uploads/default-event.jpg';
     const event = new Event({
       title,
       description,
       date,
       location,
       maxAttendees,
+      image: imagePath,
       createdBy: req.user.id, 
     });
     await event.save();
@@ -134,3 +142,33 @@ export const registerForEventWithPayment = async (req, res) => {
     res.status(500).json({ message: 'payment error during subscription', error });
   }
 };
+
+ export const getEventStatistics = expressAsyncHandler(async (req, res) => {
+  const event = await Event.findById(req.params.id).populate('createdBy');
+
+  if (!event) {
+    res.status(404);
+    throw new Error('Événement non trouvé.');
+  }
+
+  if (!event.createdBy.equals(req.user.id)) {
+    res.status(403);
+    throw new Error('Accès non autorisé.');
+  }
+
+  const totalRegistrations = event.seatsAvailableInitial - event.seatsAvailable; // Total d'inscriptions
+  const totalRevenue = totalRegistrations * event.price; // Total des revenus
+
+  // Exemple de liste d'inscrits (mocké pour l'instant)
+  const registrants = [
+    { name: 'John Doe', email: 'john@example.com' },
+    { name: 'Jane Smith', email: 'jane@example.com' },
+  ];
+
+  res.json({
+    totalRegistrations,
+    totalRevenue,
+    registrants,
+  });
+});
+

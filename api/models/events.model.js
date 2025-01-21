@@ -44,6 +44,9 @@ const eventSchema = new Schema({
       ref: 'User',
     },
   ],
+  image: { type: String,
+     default: 'default-event.jpg'
+     }, 
   attendees: [
     {
       type: Schema.Types.ObjectId,

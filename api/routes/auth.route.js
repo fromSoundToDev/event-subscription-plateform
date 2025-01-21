@@ -15,4 +15,4 @@ router.post('/login-user', loginUser);
 router.get('/me',protect, getMe);
 
 
-export default authRouter;
+export default authRoute;
