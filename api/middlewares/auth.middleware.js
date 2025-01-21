@@ -21,13 +21,13 @@ const protect = asyncHandler(async (req, res, next) => {
     } catch (error) {
       console.error(error);
       res.status(401);
-      throw new Error('Non autorisé, token invalide.');
+      throw new Error(' invalid token.');
     }
   }
 
   if (!token) {
     res.status(401);
-    throw new Error('Non autorisé, aucun token.');
+    throw new Error('cant find token.');
   }
 });
 

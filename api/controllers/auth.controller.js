@@ -6,7 +6,7 @@ import asyncHandler from 'express-async-handler';
 // @desc    Inscription d'un utilisateur
 // @route   POST /api/auth/register
 // @access  Public
-const registerUser = asyncHandler(async (req, res) => {
+export const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
 
   // Vérifier que tous les champs sont remplis
@@ -48,7 +48,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // @desc    Connexion d'un utilisateur
 // @route   POST /api/auth/login
 // @access  Public
-const loginUser = asyncHandler(async (req, res) => {
+export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // Vérifier que tous les champs sont remplis
@@ -76,7 +76,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // @desc    Obtenir les informations de l'utilisateur connecté
 // @route   GET /api/auth/me
 // @access  Private
-const getMe = asyncHandler(async (req, res) => {
+export const getMe = asyncHandler(async (req, res) => {
   const { _id, username, email } = req.user;
   res.json({
     id: _id,
@@ -92,8 +92,4 @@ const generateToken = (id) => {
   });
 };
 
-module.exports = {
-  registerUser,
-  loginUser,
-  getMe,
-};
+
