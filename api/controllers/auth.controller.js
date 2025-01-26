@@ -28,7 +28,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   // Créer un nouvel utilisateur
   const user = await User.create({
     username,
-    email,
+    email, 
     password: hashedPassword,
   });
 
